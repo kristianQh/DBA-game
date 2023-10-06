@@ -35,18 +35,13 @@ function Home() {
     })
   };
 
-  // socket.on('exists', function(exists) {
-  //   if(exists) {
-  //     alert("Joined")
-  //   }
-  //   else {
-  //     alert("That game doesnt exist")
-  //   }
-  // })
-
   const createLobby = () => {
-
-    socket.emit('create', { room: gamePin, name: playerName });
+    socket.emit('create', { name: playerName });
+    socket.on('create', ( gamePin ) => {
+      if (gamePin != 0) {
+        navigate(`/lobby/${gamePin}`)
+      }
+    })
   };
 
   return (

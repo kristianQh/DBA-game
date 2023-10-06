@@ -1,5 +1,8 @@
+import { io } from "socket.io-client"
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+
+const socket = io.connect('http://localhost:5000');
 
 function Lobby() {
   const [data, setData] = useState(null);
@@ -18,27 +21,41 @@ function Lobby() {
       })
       .then(data => {
         // retrieved data
-        setData(data)
         console.log(data);
+        setData(data)
       })
       .catch(error => {
         console.error(error.message);
       })
-    });
+    }, [data]);
+
+  useEffect(() => {
+    if (data && data.players_ready === data.num_players) {
+      alert("Starting the game");
+    }
+  }, [data]);
+
+  const readyUp = () => {
+    document.getElementById("rdyButton").disabled = true;
+    socket.emit('ready', { pin: gamePin })
+  };
 
   return (
     <div>
       <h1>Lobby for Game {gamePin}</h1>
       {/* If no data, just load */}
-      {(data === null) ? (
+      {data === null ? (
         <p>Loading...</p>
       ) : (
-        data.map(name => (
-          <p>{name}</p>
-        ))
+        <div>
+          {data.players.map((name, index) => (
+            <p key={index}>{name}</p>
+          ))}
+          <button id="rdyButton" onClick={readyUp}>Ready {data.players_ready}/{data.num_players}</button>
+        </div>
       )}
     </div>
-  )
+  );
 }
 
 export default Lobby

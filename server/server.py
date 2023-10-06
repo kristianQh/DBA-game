@@ -18,16 +18,9 @@ socketio.init_app(app, cors_allowed_origins="*") # Accepts requests from clients
 
 #TODO: '' or "" ?
 
-# @app.route('/') #landing page
-# def index():
-#     return render_template('index.html')
-
-@app.route('/admin') #admin page
-def admin():
-    """return JSON with string data as the value"""
-    data = {'data':'This text was fetched using an HTTP call to server on render'}
-    return jsonify(data)
-
+# class GameLobby:
+#     def _init__(self, pin, players, players_ready):
+#         self.pin = pin
 @app.route('/active_games/<string:gamePin>', methods=['GET'])
 def get_active_games(gamePin):
     if gamePin in player_list:
@@ -35,10 +28,6 @@ def get_active_games(gamePin):
         return jsonify(data)
     else:
         return jsonify({"error": "Game not found"}), 404
-
-# @app.route('/<room>') # page for domain.com/room string
-# def play(room):
-#     return render_template('play.html')
 
 # dict pairing room to admin socket id
 rooms = {}
@@ -65,21 +54,13 @@ def on_join(data):
     room = data['room']
     join_room(room)
     emit('join', data, room=room)
-    print(player_list)
-    print("ROOOM:", room)
-    player_list[room].append(name)
-    print(f'{name} joined {room}') # log the event on the server
-
-# @socketio.on('buzz')
-# def on_buz(data):
-#     name = data['name']
-#     room = data['room']
-#     emit('buzz', { 'name' : name }, room=room)
+    player_list[room]['players'].append(name)
+    player_list[room]['num_players'] += 1
+    print(f'{name} joined {room}')
 
 @socketio.on('exists')
 def exsists(data):
     room = data['room']
-    print(rooms)
     emit('exists', room in rooms)
 
 @socketio.on('create')
@@ -87,34 +68,18 @@ def on_create(data):
     pin = str(uuid.uuid4())[:8]
     name = data['name']
     if pin in rooms:
-        emit('create', False)
+        emit('create', 0)
     else:
         join_room(pin)
         rooms[pin] = request.sid # socket's unique id
-        print("he")
-        player_list[pin] = [name]
-        emit('create', True)
+        player_list[pin] = {'players' : [name], 'players_ready' : 0, 'num_players' : 1}
         print(f'{name} created room: {pin}')
+        emit('create', pin)
 
-# @socketio.on('reset')
-# def on_reset(data):
-#     room = data['room']
-#     res = data['res']
-#     if is_admin(request.sid, room):
-#         emit('reset', { 'res': res }, room=room)
-
-# @socketio.on('begin')
-# def on_begin(data):
-#     room = data['room']
-#     if is_admin(request.sid, room):
-#         emit('begin', room)
-
-# @socketio.on('score')
-# def on_score(data):
-#     leaderboard = data['leaderboard']
-#     room = data['room']
-#     if is_admin(request.sid, room):
-#         emit('score', { 'leaderboard' : leaderboard }, room=room)
+@socketio.on('ready')
+def on_ready(data):
+    pin = data['pin']
+    player_list[pin]['players_ready'] += 1
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
