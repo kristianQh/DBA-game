@@ -10,7 +10,7 @@ from flask_socketio import SocketIO, emit, join_room
 log = logging.getLogger('werkzeug') # Level of the Wekzeug logger to error
 log.setLevel(logging.ERROR) # ! Only errors are logged
 
-app = Flask(__name__, template_folder="../client/public") # Flask wrapper - the template folder should be fixed
+app = Flask(__name__, template_folder="../client/public") # Flask wrapper - TODO: the template folder should be fixed
 SECRET_KEY = os.urandom(32) # secret key of 32 bytes
 app.config['SECRET_KEY'] = SECRET_KEY
 socketio = SocketIO(app) #SocketIO wrapper
@@ -21,6 +21,7 @@ socketio.init_app(app, cors_allowed_origins="*") # Accepts requests from clients
 # class GameLobby:
 #     def _init__(self, pin, players, players_ready):
 #         self.pin = pin
+
 @app.route('/active_games/<string:gamePin>', methods=['GET'])
 def get_active_games(gamePin):
     if gamePin in player_list:
@@ -83,3 +84,4 @@ def on_ready(data):
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
+    

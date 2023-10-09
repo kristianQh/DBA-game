@@ -1,12 +1,13 @@
 import { io } from "socket.io-client"
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate, redirect } from 'react-router-dom'
 
 const socket = io.connect('http://localhost:5000');
 
 function Lobby() {
   const [data, setData] = useState(null);
   const { gamePin } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(`/active_games/${gamePin}`)
@@ -31,7 +32,7 @@ function Lobby() {
 
   useEffect(() => {
     if (data && data.players_ready === data.num_players) {
-      alert("Starting the game");
+      navigate(`/game/${gamePin}`, { replace: true });
     }
   }, [data]);
 
