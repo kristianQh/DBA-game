@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 const socket = io.connect('http://localhost:5000');
 
 function Home() {
-  const [socketInstance, setSocketInstance] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [gamePin, setGamePin] = useState("");
   const navigate = useNavigate();
@@ -22,6 +21,7 @@ function Home() {
   }, []);
 
   const joinLobby = (event) => {
+    // Wait on asynchronous socket communication
     event.preventDefault();
     socket.emit('exists', { room: gamePin, name: playerName });
 
@@ -38,7 +38,7 @@ function Home() {
   const createLobby = () => {
     socket.emit('create', { name: playerName });
     socket.on('create', ( gamePin ) => {
-      if (gamePin != 0) {
+      if (gamePin !== 0) {
         navigate(`/lobby/${gamePin}`)
       }
     })

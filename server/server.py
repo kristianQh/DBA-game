@@ -4,10 +4,11 @@
 import uuid
 import os
 import logging
+import scrapper
 from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit, join_room
 
-log = logging.getLogger('werkzeug') # Level of the Wekzeug logger to error
+log = logging.getLogger('werkzeug') # Wekzeug logger
 log.setLevel(logging.ERROR) # ! Only errors are logged
 
 app = Flask(__name__, template_folder="../client/public") # Flask wrapper - TODO: the template folder should be fixed
@@ -17,11 +18,11 @@ socketio = SocketIO(app) #SocketIO wrapper
 socketio.init_app(app, cors_allowed_origins="*") # Accepts requests from clients when hosted on real server
 
 #TODO: '' or "" ?
-
 # class GameLobby:
 #     def _init__(self, pin, players, players_ready):
 #         self.pin = pin
 
+#TODO gamePin is simply just handled as a string?
 @app.route('/active_games/<string:gamePin>', methods=['GET'])
 def get_active_games(gamePin):
     if gamePin in player_list:
@@ -29,6 +30,12 @@ def get_active_games(gamePin):
         return jsonify(data)
     else:
         return jsonify({"error": "Game not found"}), 404
+    
+dba_data = []
+
+@app.route('/<string:gamePin>/dba_data', methods=['GET'])
+def get_dba_data(gamePin):
+    return jsonify(dba_data)
 
 # dict pairing room to admin socket id
 rooms = {}
@@ -81,6 +88,13 @@ def on_create(data):
 def on_ready(data):
     pin = data['pin']
     player_list[pin]['players_ready'] += 1
+
+@socketio.on('scrape')
+def on_scrape(data):
+    dba_url = data['url']
+    dba_scrapper = scrapper.DBAScrapper()
+    h = dba_scrapper.scrape_article(dba_url)
+    emit('scraped_data', h)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)

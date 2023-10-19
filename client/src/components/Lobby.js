@@ -30,6 +30,7 @@ function Lobby() {
       })
     }, [data]);
 
+  // If data exists and number of players match replace current page with game client
   useEffect(() => {
     if (data && data.players_ready === data.num_players) {
       navigate(`/game/${gamePin}`, { replace: true });
@@ -44,8 +45,9 @@ function Lobby() {
   return (
     <div>
       <h1>Lobby for Game {gamePin}</h1>
-      {/* If no data, just load */}
-      {data === null ? (
+      {
+      // If no data just load
+      data === null ? (
         <p>Loading...</p>
       ) : (
         <div>
