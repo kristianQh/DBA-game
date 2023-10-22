@@ -11,7 +11,7 @@ class DBAScrapper:
         # Create a single string
         description_text = "\n".join(description_texts)
         # Remove any indication of price with regex
-        # Match integeres and integers ranges followed by 'kr' or 'kr.'
+        # Match integers and integer ranges followed by 'kr' or 'kr.'
         description_text = re.sub(r"\d+(?:-\d+)? kr\.?", "❌ kr.", description_text)
         return description_text
 
@@ -30,7 +30,7 @@ class DBAScrapper:
             image_urls = [img["src"] for img in images.find_all("img")[1:]]
             return {
                 "title": title,
-                "descritpion": description,
+                "description": description,
                 "price": price_num,
                 "image_urls": image_urls,
             }
