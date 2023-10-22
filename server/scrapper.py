@@ -1,55 +1,41 @@
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+import re
 import requests
-import time
-
-
-options = Options()
-options.add_argument('--headless')
-# driver = webdriver.Firefox(options=options)
-# driver.get('https://www.dba.dk/')
-# time.sleep(2)
-# html = driver.page_source
+from bs4 import BeautifulSoup
 
 
 class DBAScrapper:
+    def scrape_descriptions(self, doc):
+        description_html = doc.find("div", {"class": "vip-additional-text"})
+        # Retrieve string with extra whitespace removed
+        description_texts = list(description_html.stripped_strings)
+        # Create a single string
+        description_text = "\n".join(description_texts)
+        # Remove any indication of price with regex
+        # Match integeres and integers ranges followed by 'kr' or 'kr.'
+        description_text = re.sub(r"\d+(?:-\d+)? kr\.?", "❌ kr.", description_text)
+        return description_text
+
     def scrape_article(self, url):
-        result = requests.get(url)
-        doc = BeautifulSoup(result.text, "html.parser")
-        prices = doc.find_all("span", {"class": "price-tag"})
-        title = doc.find_all("h1")
-        description = doc.find_all("div", {"class": "vip-additional-text"})
-        image_urls = []
-        images = doc.find_all("div", {"class": "vip-picture-gallery"})
-        for div in images:
-            links = div.find_all("a")
-            for a in links:
-                image_urls.append(a)
-        return [x.get_text() for x in description]
-
-# url = "https://www.dba.dk/"
-# result = requests.get(url)
-# doc = BeautifulSoup(html, "html.parser")
-
-# h = doc.find_all("a", {"class": "gallery-cell gallery-cell-default"})
-# print(h[0].get('href'))
-# print(doc.prettify)
-# url = "https://www.dba.dk/dameur-tissot-elegant-og/id-1106571770/"
-
-# result = requests.get(url)
-# doc = BeautifulSoup(result.text, "html.parser")
-# # print(doc.prettify())
-
-# prices = doc.find_all("span", {"class": "price-tag"})
-# title = doc.find_all("h1")
-# description = doc.find_all("div", {"class": "vip-additional-text"})
-# images = doc.find_all("div", {"class": "vip-picture-gallery"})
-# for div in images:
-#     links = div.find_all("a")
-#     for a in links:
-#         print("http://www.dba.dk/" + a['href'])
-# print(prices[0].string)
-# print(title[0].string)
-# print(description[0])
-# print(images)
+        try:
+            result = requests.get(url, timeout=10)
+            doc = BeautifulSoup(result.text, "html.parser")
+            price = doc.find("span", {"class": "price-tag"})
+            # Only interested in the integer price in 'x kr.'
+            price_num = int(price.text.split(" ")[0])
+            title = doc.find("h1").text
+            description = self.scrape_descriptions(doc)
+            image_urls = []
+            images = doc.find("div", {"class": "vip-picture-gallery"})
+            # Primary/active image is two times in gallery, so ignore first
+            image_urls = [img["src"] for img in images.find_all("img")[1:]]
+            return {
+                "title": title,
+                "descritpion": description,
+                "price": price_num,
+                "image_urls": image_urls,
+            }
+        except requests.Timeout:
+            return "Timeout occurred, maybe request again?"
+        # AttributeError is a bit of a hacky exception type for now
+        except AttributeError:
+            return "Error, possibly wrong link?"
