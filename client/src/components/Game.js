@@ -1,10 +1,8 @@
-import { io } from "socket.io-client"
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
-const socket = io.connect('http://localhost:5000');
-
-function Game() {
+function Game(props) {
+  const { socket } = props;
   const [articleURL, setArticleURL] = useState("");
   const { gamePin } = useParams();
   const [scrapedData, setScrapedData] = useState(null);
@@ -35,7 +33,9 @@ function Game() {
       {scrapedData && (
         <div>
           <h2>Scraped data</h2>
-          <pre>{scrapedData[0]}</pre>
+          <h3>{scrapedData["title"]}</h3>
+          <p>{scrapedData["description"]}</p>
+          <img src={scrapedData["image_urls"][1]} alt="alternatetext"></img>
         </div>
       )}
     </div>

@@ -1,10 +1,8 @@
-import { io } from "socket.io-client"
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate, redirect } from 'react-router-dom'
 
-const socket = io.connect('http://localhost:5000');
-
-function Lobby() {
+function Lobby(props) {
+  const {socket} = props;
   const [data, setData] = useState(null);
   const { gamePin } = useParams();
   const navigate = useNavigate();

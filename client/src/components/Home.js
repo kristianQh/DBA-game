@@ -1,24 +1,13 @@
-import { io } from "socket.io-client"
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const socket = io.connect('http://localhost:5000');
-
-function Home() {
+function Home(props) {
+  const {socket} = props;
   const [playerName, setPlayerName] = useState("");
   const [gamePin, setGamePin] = useState("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    socket.on('connect', () => {
-      console.log('Connected to server');
-
-      return () => {
-        socket.disconnect()
-      }
-
-    });
-  }, []);
+  console.log("Hmmm")
 
   const joinLobby = (event) => {
     // Wait on asynchronous socket communication

@@ -30,12 +30,6 @@ def get_active_games(gamePin):
         return jsonify(data)
     else:
         return jsonify({"error": "Game not found"}), 404
-    
-dba_data = []
-
-@app.route('/<string:gamePin>/dba_data', methods=['GET'])
-def get_dba_data(gamePin):
-    return jsonify(dba_data)
 
 # dict pairing room to admin socket id
 rooms = {}
@@ -45,8 +39,8 @@ def is_admin(idx, room):
     return rooms[room] == idx #is socket admin of room?
 
 @socketio.on('connect')
-def handle_connect():
-    print('User connected')
+def on_connect():
+    print('User connected', request.sid)
 
 @socketio.on('disconnect')
 def on_admin_disconnect():
@@ -62,7 +56,7 @@ def on_join(data):
     room = data['room']
     join_room(room)
     emit('join', data, room=room)
-    player_list[room]['players'].append(name)
+    player_list[room]['players'].append((name, request.sid))
     player_list[room]['num_players'] += 1
     print(f'{name} joined {room}')
 
@@ -80,7 +74,7 @@ def on_create(data):
     else:
         join_room(pin)
         rooms[pin] = request.sid # socket's unique id
-        player_list[pin] = {'players' : [name], 'players_ready' : 0, 'num_players' : 1}
+        player_list[pin] = {'players' : [(name, request.sid)], 'players_ready' : 0, 'num_players' : 1}
         print(f'{name} created room: {pin}')
         emit('create', pin)
 
@@ -93,9 +87,9 @@ def on_ready(data):
 def on_scrape(data):
     dba_url = data['url']
     dba_scrapper = scrapper.DBAScrapper()
-    h = dba_scrapper.scrape_article(dba_url)
-    emit('scraped_data', h)
+    data = dba_scrapper.scrape_article(dba_url)
+    emit('scraped_data', data)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app)
     
