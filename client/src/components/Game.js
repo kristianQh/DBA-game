@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useState } from 'react'
 
 function Game(props) {
   const { socket } = props;
   const [articleURL, setArticleURL] = useState("");
-  const { gamePin } = useParams();
   const [scrapedData, setScrapedData] = useState(null);
 
   const retrieveLink = (event) => {
@@ -35,7 +33,7 @@ function Game(props) {
           <h2>Scraped data</h2>
           <h3>{scrapedData["title"]}</h3>
           <p>{scrapedData["description"]}</p>
-          <img src={scrapedData["image_urls"][1]} alt="alternatetext"></img>
+          <img src={scrapedData["image_urls"][1]} alt="text"></img>
         </div>
       )}
     </div>

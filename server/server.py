@@ -55,10 +55,12 @@ def on_join(data):
     name = data['name']
     room = data['room']
     join_room(room)
-    emit('join', data, room=room)
+    # emit('join', data, room=room)
     player_list[room]['players'].append((name, request.sid))
     player_list[room]['num_players'] += 1
     print(f'{name} joined {room}')
+    print("Emitting join")
+    emit('player_joined', player_list[room], broadcast=True)
 
 @socketio.on('exists')
 def exsists(data):
@@ -77,6 +79,7 @@ def on_create(data):
         player_list[pin] = {'players' : [(name, request.sid)], 'players_ready' : 0, 'num_players' : 1}
         print(f'{name} created room: {pin}')
         emit('create', pin)
+        emit('player_joined', player_list[pin])
 
 @socketio.on('ready')
 def on_ready(data):

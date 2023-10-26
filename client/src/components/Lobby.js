@@ -8,25 +8,11 @@ function Lobby(props) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`/active_games/${gamePin}`)
-      .then(response => {
-        if (response.status === 200) {
-          return response.json();
-        } else if (response.status === 404) {
-          throw new Error('Game not found');
-        } else {
-          throw new Error('Error fetching data');
-        }
-      })
-      .then(data => {
-        // retrieved data
-        console.log(data);
-        setData(data)
-      })
-      .catch(error => {
-        console.error(error.message);
-      })
-    }, [data]);
+    socket.on('player_joined', (playerData) => {
+      console.log(playerData)
+      setData(playerData)
+    });
+  }, [socket]);
 
   // If data exists and number of players match replace current page with game client
   useEffect(() => {
@@ -50,7 +36,8 @@ function Lobby(props) {
       ) : (
         <div>
           {data.players.map((name, index) => (
-            <p key={index}>{name}</p>
+            // (key : [name, sid])
+            <p key={index}>{name[0]}</p>
           ))}
           <button id="rdyButton" onClick={readyUp}>Ready {data.players_ready}/{data.num_players}</button>
         </div>

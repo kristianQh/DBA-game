@@ -7,8 +7,6 @@ function Home(props) {
   const [gamePin, setGamePin] = useState("");
   const navigate = useNavigate();
 
-  console.log("Hmmm")
-
   const joinLobby = (event) => {
     // Wait on asynchronous socket communication
     event.preventDefault();
