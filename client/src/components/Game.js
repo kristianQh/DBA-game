@@ -1,9 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 function Game(props) {
   const { socket } = props;
-  const [articleURL, setArticleURL] = useState("");
+  const [articleURL, setArticleURL] = useState('');
   const [scrapedData, setScrapedData] = useState(null);
+  const [currentPlayerSid, setCurrentPlayerSid] = useState(null);
+  const [playerSid, setPlayerSid] = useState(null);
+
+  useEffect(() => {
+    socket.on('player_turn', (data) => {
+      const { current_player_sid, player_sid } = data
+      setPlayerSid(player_sid)
+      setCurrentPlayerSid(current_player_sid)
+    });
+  }, [socket]);
 
   const retrieveLink = (event) => {
     // Wait on scrapper
@@ -19,15 +29,17 @@ function Game(props) {
   return (
     <div>
       <h1>Game</h1>
-      <form onSubmit={retrieveLink}>
-        <input
-          type="text"
-          placeholder='DBA Article Link'
-          value={articleURL}
-          onChange={(e) => setArticleURL(e.target.value)}
-        />
-        <input type="submit" value="Submit" />
-      </form>
+      {currentPlayerSid == playerSid && playerSid !== null ? (
+        <form onSubmit={retrieveLink}>
+          <input
+            type="text"
+            placeholder='DBA Article Link'
+            value={articleURL}
+            onChange={(e) => setArticleURL(e.target.value)}
+          />
+          <input type="submit" value="Submit" />
+        </form>
+      ) : ("")}
       {scrapedData && (
         <div>
           <h2>Scraped data</h2>

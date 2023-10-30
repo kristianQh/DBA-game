@@ -8,7 +8,7 @@ function Lobby(props) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    socket.on('player_joined', (playerData) => {
+    socket.on('update_playerdata', (playerData) => {
       console.log(playerData)
       setData(playerData)
     });
@@ -19,6 +19,7 @@ function Lobby(props) {
     if (data && data.players_ready === data.num_players) {
       navigate(`/game/${gamePin}`, { replace: true });
     }
+    socket.emit('game_starting', { pin : gamePin })
   }, [data]);
 
   const readyUp = () => {

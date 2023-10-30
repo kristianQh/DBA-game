@@ -53,18 +53,16 @@ def on_admin_disconnect():
 @socketio.on('join')
 def on_join(data):
     name = data['name']
-    room = data['room']
-    join_room(room)
-    # emit('join', data, room=room)
-    player_list[room]['players'].append((name, request.sid))
-    player_list[room]['num_players'] += 1
-    print(f'{name} joined {room}')
-    print("Emitting join")
-    emit('player_joined', player_list[room], broadcast=True)
+    pin = data['pin']
+    join_room(pin)
+    player_list[pin]['players'].append((name, request.sid))
+    player_list[pin]['num_players'] += 1
+    print(f'{name} joined {pin}')
+    emit('update_playerdata', player_list[pin], room=pin)
 
 @socketio.on('exists')
 def exsists(data):
-    room = data['room']
+    room = data['pin']
     emit('exists', room in rooms)
 
 @socketio.on('create')
@@ -79,12 +77,14 @@ def on_create(data):
         player_list[pin] = {'players' : [(name, request.sid)], 'players_ready' : 0, 'num_players' : 1}
         print(f'{name} created room: {pin}')
         emit('create', pin)
-        emit('player_joined', player_list[pin])
+        # No need for broadcast, creating player is only current player
+        emit('update_playerdata', player_list[pin])
 
 @socketio.on('ready')
 def on_ready(data):
     pin = data['pin']
     player_list[pin]['players_ready'] += 1
+    emit('update_playerdata', player_list[pin], room=pin)
 
 @socketio.on('scrape')
 def on_scrape(data):
@@ -92,6 +92,11 @@ def on_scrape(data):
     dba_scrapper = scrapper.DBAScrapper()
     data = dba_scrapper.scrape_article(dba_url)
     emit('scraped_data', data)
+
+@socketio.on('game_starting')
+def on_start(data):
+    pin = data['pin']
+    emit('player_turn', {'player_sid' : request.sid, 'current_player_sid' : player_list[pin]['players'][0][1]})
 
 if __name__ == '__main__':
     socketio.run(app)

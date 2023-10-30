@@ -10,11 +10,11 @@ function Home(props) {
   const joinLobby = (event) => {
     // Wait on asynchronous socket communication
     event.preventDefault();
-    socket.emit('exists', { room: gamePin, name: playerName });
+    socket.emit('exists', { pin: gamePin, name: playerName });
 
     socket.on('exists', (exists) => {
       if (exists) {
-        socket.emit('join', { room: gamePin, name: playerName });
+        socket.emit('join', { pin: gamePin, name: playerName });
         navigate(`/lobby/${gamePin}`)
       } else {
         alert('Invalid game pin')
