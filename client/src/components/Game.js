@@ -6,12 +6,18 @@ function Game(props) {
   const [scrapedData, setScrapedData] = useState(null);
   const [currentPlayerSid, setCurrentPlayerSid] = useState(null);
   const [playerSid, setPlayerSid] = useState(null);
+  const [gamePin, setGamePin] = useState("");
 
   useEffect(() => {
     socket.on('player_turn', (data) => {
-      const { current_player_sid, player_sid } = data
-      setPlayerSid(player_sid)
+      const { current_player_sid, game_pin } = data
+      setGamePin(game_pin)
       setCurrentPlayerSid(current_player_sid)
+    });
+    socket.on('set_client_sid', (data) => {
+      const { player_sid } = data
+      setPlayerSid(player_sid)
+      console.log(playerSid)
     });
   }, [socket]);
 
@@ -26,10 +32,15 @@ function Game(props) {
     })
   };
 
+  const confirmInput = () => {
+    document.getElementById("rdyButton").disabled = true;
+    socket.emit('confirm_price', { pin: gamePin })
+  };
+
   return (
     <div>
       <h1>Game</h1>
-      {currentPlayerSid == playerSid && playerSid !== null ? (
+      {currentPlayerSid === playerSid && playerSid !== null ? (
         <form onSubmit={retrieveLink}>
           <input
             type="text"
@@ -48,6 +59,7 @@ function Game(props) {
           <img src={scrapedData["image_urls"][1]} alt="text"></img>
         </div>
       )}
+      <button id="rdyButton" onClick={confirmInput}>Test button</button>
     </div>
 
   )

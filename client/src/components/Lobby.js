@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams, useNavigate, redirect } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 
 function Lobby(props) {
   const {socket} = props;
@@ -18,8 +18,8 @@ function Lobby(props) {
   useEffect(() => {
     if (data && data.players_ready === data.num_players) {
       navigate(`/game/${gamePin}`, { replace: true });
+      socket.emit('game_starting', { pin : gamePin })
     }
-    socket.emit('game_starting', { pin : gamePin })
   }, [data]);
 
   const readyUp = () => {
