@@ -20,8 +20,10 @@ class DBAScrapper:
             result = requests.get(url, timeout=10)
             doc = BeautifulSoup(result.text, "html.parser")
             price = doc.find("span", {"class": "price-tag"})
-            # Only interested in the integer price in 'x kr.'
-            price_num = int(price.text.split(" ")[0])
+            # Only interested in the price, not the ' kr.'
+            price = price.text.split(" ")[0]
+            # Remove thousands seperator and convert to int
+            price_num = int(price.replace('.', ''))
             title = doc.find("h1").text
             description = self.scrape_descriptions(doc)
             image_urls = []

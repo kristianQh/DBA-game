@@ -15,21 +15,19 @@ function Game(props) {
       setCurrentPlayerSid(current_player_sid)
     });
     socket.on('set_client_sid', (data) => {
-      const { player_sid } = data
-      setPlayerSid(player_sid)
+      setPlayerSid(data)
       console.log(playerSid)
     });
+    socket.on('scraped_data', (data) => {
+      setScrapedData(data);
+      console.log(scrapedData)
+    })
   }, [socket]);
 
   const retrieveLink = (event) => {
     // Wait on scrapper
     event.preventDefault();
-    socket.emit('scrape', { url: articleURL });
-
-    socket.on('scraped_data', (data) => {
-      setScrapedData(data);
-      console.log(data)
-    })
+    socket.emit('scrape', { url: articleURL, pin: gamePin });
   };
 
   const confirmInput = () => {
@@ -55,8 +53,9 @@ function Game(props) {
         <div>
           <h2>Scraped data</h2>
           <h3>{scrapedData["title"]}</h3>
-          <p>{scrapedData["description"]}</p>
-          <img src={scrapedData["image_urls"][1]} alt="text"></img>
+          <p style={{whiteSpace: "pre-wrap"}}>{scrapedData["description"]} </p>
+          {console.log(scrapedData)}
+          <img src={scrapedData["image_urls"][0]} alt="text"></img>
         </div>
       )}
       <button id="rdyButton" onClick={confirmInput}>Test button</button>

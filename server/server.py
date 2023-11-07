@@ -108,9 +108,10 @@ def on_ready(data):
 @socketio.on("scrape")
 def on_scrape(data):
     dba_url = data["url"]
+    pin = data["pin"]
     dba_scrapper = scrapper.DBAScrapper()
     data = dba_scrapper.scrape_article(dba_url)
-    emit("scraped_data", data)
+    emit("scraped_data", data, room=pin)
 
 
 @socketio.on("game_starting")
@@ -121,7 +122,7 @@ def on_start(data):
     player_list[pin]["players_ready"] = 0
     print("Current player sid ", current_player_sid)
     print("Player sid", request.sid)
-    emit("set_client_sid", {"player_sid": request.sid})
+    emit("set_client_sid", request.sid)
     emit(
         "player_turn",
         {"current_player_sid": current_player_sid, "game_pin" : pin},
@@ -135,8 +136,6 @@ def confirm_price(data):
     if player_list[pin]["players_ready"] == len(player_list[pin]["players"]):
         current_player_idx = player_list[pin]["current_player_idx"] + 1
         current_player_sid = player_list[pin]["players"][current_player_idx][1]
-        # print("Current player sid ", current_player_sid)
-        # print("Player sid", request.sid)
         emit(
             "player_turn",
             {
