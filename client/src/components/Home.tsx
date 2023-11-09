@@ -2,7 +2,6 @@ import { useEffect, useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Socket } from "socket.io-client";
 
-// Define a type for the props expected by the Home component
 type HomeProps = {
   socket: Socket;
 };
