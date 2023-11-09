@@ -1,34 +1,38 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { Socket } from "socket.io-client";
 
-function Home(props) {
-  const {socket} = props;
-  const [playerName, setPlayerName] = useState("");
-  const [gamePin, setGamePin] = useState("");
+// Define a type for the props expected by the Home component
+type HomeProps = {
+  socket: Socket;
+};
+
+function Home({ socket }: HomeProps) {
+  const [playerName, setPlayerName] = useState<string>("");
+  const [gamePin, setGamePin] = useState<string>("");
   const navigate = useNavigate();
 
-  const joinLobby = (event) => {
-    // Wait on asynchronous socket communication
+  const joinLobby = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     socket.emit('exists', { pin: gamePin, name: playerName });
 
-    socket.on('exists', (exists) => {
+    socket.on('exists', (exists: boolean) => {
       if (exists) {
         socket.emit('join', { pin: gamePin, name: playerName });
-        navigate(`/lobby/${gamePin}`)
+        navigate(`/lobby/${gamePin}`);
       } else {
-        alert('Invalid game pin')
+        alert('Invalid game pin');
       }
-    })
+    });
   };
 
   const createLobby = () => {
     socket.emit('create', { name: playerName });
-    socket.on('create', ( gamePin ) => {
-      if (gamePin !== 0) {
-        navigate(`/lobby/${gamePin}`)
+    socket.on('create', (gamePin: string) => {
+      if (gamePin !== '0') {
+        navigate(`/lobby/${gamePin}`);
       }
-    })
+    });
   };
 
   return (
